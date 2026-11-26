@@ -1,0 +1,16 @@
+[project]
+name = "nfl-app"
+version = "1.0.0"
+description = "NFL Season Dashboard"
+requires-python = ">=3.11"  # tomllib in utils/load_nfl_season.py
+dependencies = [
+    "streamlit==1.51.0",
+    "plotly>=5.18.0",
+    "pandas>=2.0.0",
+    "snowflake-connector-python[pandas]>=3.12",
+    "snowflake-snowpark-python>=1.14.0",
+    "requests>=2.31.0",
+    "pytz",
+    "folium>=0.15.0",
+    "streamlit-folium==0.27.2",
+]

@@ -1,0 +1,10 @@
+# Local Snowflake credentials (key path, account) - never commit
+.streamlit/secrets.toml
+*.p8
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/

@@ -1,0 +1,206 @@
+/* Font */
+h1, h2, h3, h4, h5, h6, p, span, div {
+    font-family: Lato-Bold, Lato, sans-serif;
+}
+
+/* Sidebar — animated gradient */
+@keyframes sidebarGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(135deg, #1A3E5C, #0d3d52, #115675, #1A3E5C) !important;
+    background-size: 300% 300%;
+    animation: sidebarGradient 12s ease infinite;
+}
+
+/* Metric cards — glassmorphism */
+div[data-testid="stMetric"] {
+    background: rgba(17, 86, 117, 0.25) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(41, 181, 232, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 800;
+    padding: 10px;
+}
+
+div[data-testid="stMetric"] p {
+    color: #ffffff;
+}
+
+div[data-testid="stMetricValue"] {
+    text-align: center;
+    font-size: 40px;
+}
+
+/* Subheaders */
+h2, h3, [data-testid="stSubheader"] {
+    color: rgb(17, 86, 117) !important;
+}
+
+/* Captions */
+div[data-testid="stCaptionContainer"] {
+    text-align: left;
+}
+
+div[data-testid="stCaptionContainer"] p {
+    color: #ffffff !important;
+}
+
+/* Links */
+a {
+    color: #ffffff;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+a:hover {
+    color: #0a3d54;
+}
+
+/* Badges */
+.live-badge {
+    display: inline-block;
+    background: #FF4B4B;
+    color: white;
+    padding: 4px 16px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    animation: pulse 1.5s infinite;
+    letter-spacing: 1px;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Streamlit alert overrides */
+div[data-testid="stAlert"] p {
+    color: #ffffff !important;
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Page-load fade-in: content slides up and fades in */
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Page transition fade: smooth entry on navigation */
+@keyframes pageFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.block-container {
+    animation: pageFadeIn 0.6s ease-out, fadeSlideIn 0.8s ease-out;
+    /* Clear Streamlit's fixed header (~3.75rem) so the score banner is visible */
+    padding-top: 4.5rem !important;
+}
+
+/* Staggered fade-in for child elements */
+.block-container > div {
+    animation: fadeSlideIn 0.7s ease-out backwards;
+}
+.block-container > div:nth-child(1) { animation-delay: 0.1s; }
+.block-container > div:nth-child(2) { animation-delay: 0.2s; }
+.block-container > div:nth-child(3) { animation-delay: 0.3s; }
+.block-container > div:nth-child(4) { animation-delay: 0.4s; }
+.block-container > div:nth-child(5) { animation-delay: 0.5s; }
+.block-container > div:nth-child(6) { animation-delay: 0.6s; }
+
+/* Hover effects on cards and interactive elements */
+div[data-testid="stMetric"] {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+div[data-testid="stMetric"]:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(41, 181, 232, 0.4);
+}
+
+/* Expander — glassmorphism + hover glow */
+div[data-testid="stExpander"] {
+    background: rgba(17, 86, 117, 0.2) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(41, 181, 232, 0.15);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    border-radius: 12px;
+}
+div[data-testid="stExpander"]:hover {
+    box-shadow: 0 0 20px rgba(41, 181, 232, 0.35), 0 0 40px rgba(41, 181, 232, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Sidebar nav links hover */
+section[data-testid="stSidebar"] a {
+    transition: transform 0.2s ease, background 0.2s ease, padding-left 0.2s ease;
+}
+section[data-testid="stSidebar"] a:hover {
+    transform: translateX(6px);
+}
+
+/* Pulsing live indicator — enhanced glow */
+@keyframes liveGlow {
+    0% { box-shadow: 0 0 5px rgba(255, 75, 75, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(255, 75, 75, 0.8), 0 0 40px rgba(255, 75, 75, 0.3); }
+    100% { box-shadow: 0 0 5px rgba(255, 75, 75, 0.4); }
+}
+
+.live-badge {
+    animation: pulse 1.5s infinite, liveGlow 2s infinite;
+}
+
+/* ===== END ANIMATIONS ===== */
+
+/* Selectbox/dropdown styling — glassmorphism */
+div[data-testid="stSelectbox"] > div > div {
+    background-color: rgba(17, 86, 117, 0.25) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-color: rgba(41, 181, 232, 0.25) !important;
+}
+
+/* Number input styling */
+[data-testid="stNumberInput"] input,
+[data-testid="stNumberInput"] [data-baseweb="input"] {
+    background-color: rgba(17, 86, 117, 0.3) !important;
+    border-color: rgba(41, 181, 232, 0.3) !important;
+}
+
+[data-testid="stNumberInput"] [data-baseweb="input"] > div {
+    background-color: transparent !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.6rem !important;
+    }
+    h2 {
+        font-size: 1.3rem !important;
+    }
+    h3 {
+        font-size: 1.1rem !important;
+    }
+    .block-container {
+        padding-top: 4.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
