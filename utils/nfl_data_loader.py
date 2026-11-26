@@ -9,7 +9,6 @@ import logging
 import threading
 import time
 
-import pandas as pd
 import streamlit as st
 
 from utils.snowflake_connector import get_connection, lower_columns, run_query
@@ -138,11 +137,6 @@ def load_byes(season, week):
         ORDER BY t.TEAM_NAME
     """
     return lower_columns(run_query(sql, params=[int(season), int(week)], ttl=CACHE_TTL))
-
-
-def split_standings_by_conference(df: pd.DataFrame) -> dict:
-    """{'AFC': df, 'NFC': df} for rendering side-by-side tables."""
-    return {conf: df[df["conference"] == conf].reset_index(drop=True) for conf in CONFERENCES}
 
 
 # ---------------------------------------------------------------- game-by-game sync
