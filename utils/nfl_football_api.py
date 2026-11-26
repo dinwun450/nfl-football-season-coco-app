@@ -241,8 +241,8 @@ def _normalize_events(events, statuses):
 
 
 def get_live_matches():
-    """Games currently in progress, from the shared snapshot (no extra cache layer)."""
-    return _normalize_events(_fetch_window_events(), LIVE_STATUSES)
+    """Games in progress: schedule from the shared snapshot, state from each game's summary."""
+    return [_with_summary_state(m) for m in _normalize_events(_fetch_window_events(), LIVE_STATUSES)]
 
 
 def get_completed_matches():
@@ -421,6 +421,8 @@ def _normalize_play(play, drive_team):
         "type": play_type,
         "text": play.get("text"),
         "label": label,
+        # Down & distance for the next snap (e.g. "1st & 10 at DAL 25").
+        "next_down_distance": end.get("downDistanceText"),
         "down": _to_int(start.get("down")),
         "distance": _to_int(start.get("distance")),
         "team_id": _to_int((start.get("team") or {}).get("id")) or drive_team,
@@ -435,18 +437,53 @@ def _normalize_play(play, drive_team):
 
 def get_game_plays(event_id):
     """Play-by-play for one game, most recent play first (same time slot as the scoreboard)."""
-    return _game_plays(event_id, int(time.time() // LIVE_REFRESH_SECONDS))
+    return _game_summary(event_id, int(time.time() // LIVE_REFRESH_SECONDS))["plays"]
+
+
+def _with_summary_state(match):
+    """Overlay clock, scores and possession from the game's summary payload.
+
+    The scoreboard and summary endpoints update at different moments; taking a
+    live game's state from the same payload as its plays keeps the score banner,
+    live card and last play on one moment in time.
+    """
+    summary = _game_summary(match["match_id"], int(time.time() // LIVE_REFRESH_SECONDS))
+    status = summary["status"]
+    if not status:
+        return match
+    status_type = status.get("type", {})
+    period = status.get("period", match["quarter"])
+    match = {**match,
+             "status_name": status_type.get("name", match["status_name"]),
+             "status": _map_status(status_type.get("name"), period),
+             "status_detail": status_type.get("shortDetail") or status_type.get("detail") or match["status_detail"],
+             "clock": status.get("displayClock", match["clock"]),
+             "quarter": period,
+             "possession_team_id": summary["possession_team_id"] or match["possession_team_id"]}
+    for side in ("home_team", "away_team"):
+        team = match[side]
+        if team and team["team_id"] in summary["scores"]:
+            match[side] = {**team, "score": summary["scores"][team["team_id"]]}
+    last = summary["plays"][0] if summary["plays"] else None
+    if last and last.get("next_down_distance"):
+        match["down_distance"] = last["next_down_distance"]
+    return match
 
 
 @st.cache_data(ttl=LIVE_REFRESH_SECONDS * 4, max_entries=64, show_spinner=False)
-def _game_plays(event_id, slot):
+def _game_summary(event_id, slot):
+    """One summary fetch per game per slot: plays plus the game state at that moment."""
+    empty = {"plays": [], "status": None, "scores": {}, "possession_team_id": None}
     try:
         response = requests.get(ESPN_SUMMARY_URL, params={"event": event_id}, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
     except requests.RequestException as exc:
         st.error(f"Failed to fetch play-by-play: {exc}")
-        return []
-    drives = response.json().get("drives") or {}
+        return empty
+    data = response.json()
+    competition = ((data.get("header") or {}).get("competitions") or [{}])[0]
+    competitors = competition.get("competitors") or []
+    drives = data.get("drives") or {}
     all_drives = list(drives.get("previous") or [])
     current = drives.get("current")
     if current and current.get("id") not in {d.get("id") for d in all_drives}:
@@ -460,4 +497,9 @@ def _game_plays(event_id, slot):
                 continue
             seen.add(play.get("id"))
             plays.append(_normalize_play(play, drive_team))
-    return sorted(plays, key=lambda p: p["sequence"], reverse=True)
+    return {
+        "plays": sorted(plays, key=lambda p: p["sequence"], reverse=True),
+        "status": competition.get("status"),
+        "scores": {_to_int(c.get("id")): _to_int(c.get("score")) for c in competitors},
+        "possession_team_id": next((_to_int(c.get("id")) for c in competitors if c.get("possession")), None),
+    }

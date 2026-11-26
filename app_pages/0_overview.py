@@ -55,7 +55,7 @@ def _live_game(match):
             return
 
         # Current situation is always visible; the full log is collapsible.
-        st.html(build_field_html(plays[0], home, away))
+        st.html(build_field_html(plays[0], home, away, situation=match.get("down_distance")))
         # Label stays constant so the open/closed state survives each refresh.
         with st.expander("Play-by-play", icon=":material/format_list_bulleted:"):
             st.caption(f"{len(plays)} plays, most recent first")

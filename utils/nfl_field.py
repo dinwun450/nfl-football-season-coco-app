@@ -127,20 +127,25 @@ def _offense_abbr(play, home, away):
     return ((home if is_home else away) or {}).get("abbreviation")
 
 
-def build_field_html(play, home, away):
+def build_field_html(play, home, away, situation=None):
     """Full-size field for one play (e.g. the current play of a live game).
 
     play: dict from get_game_plays (start/end spots, label, text, clock, period).
     home/away: team dicts with team_id, abbreviation and color.
+    situation: current down & distance (the next snap), shown as the heading so it
+    matches the score banner; the play's own starting down goes in the meta line.
     """
     # The play's clock is when it was snapped, not the current game clock.
-    meta = f'Last play &middot; snapped Q{_e(play.get("period"))} {_e(play.get("clock"))} &middot; {_e(_offense_abbr(play, home, away))} ball'
+    meta = f'Last play &middot; snapped Q{_e(play.get("period"))} {_e(play.get("clock"))}'
+    if situation and play.get("label"):
+        meta += f' on {_e(play["label"])}'
+    meta += f' &middot; {_e(_offense_abbr(play, home, away))} ball'
     if play.get("type"):
         meta += f' &middot; {_e(play["type"])}'
     return (
         FIELD_CSS
         + '<div class="nflf">'
-        + f'<div class="nflf-head"><span class="nflf-dd">{_e(play.get("label"))}</span>'
+        + f'<div class="nflf-head"><span class="nflf-dd">{_e(situation or play.get("label"))}</span>'
         + f'<span class="nflf-meta">{meta}</span></div>'
         + _field_html(play, home, away)
         + f'<div class="nflf-text">{_e(play.get("text"))}</div>'

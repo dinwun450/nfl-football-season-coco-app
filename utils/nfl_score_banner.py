@@ -4,9 +4,9 @@ import streamlit as st
 
 from utils.nfl_football_api import (
     FINAL_STATUSES,
-    LIVE_STATUSES,
     _fetch_window_events,
     _normalize_events,
+    get_live_matches,
 )
 
 SECONDS_PER_BUG = 6  # scroll speed: higher = slower
@@ -50,7 +50,7 @@ def _e(value):
 def get_banner_matches(include_finals=True):
     """Live games first, then finals from the past seven days (most recent first)."""
     events = _fetch_window_events()
-    live = _normalize_events(events, LIVE_STATUSES)
+    live = get_live_matches()
     finals = _normalize_events(events, FINAL_STATUSES) if include_finals else []
     return live + sorted(finals, key=lambda m: m["utc_iso"], reverse=True)
 
